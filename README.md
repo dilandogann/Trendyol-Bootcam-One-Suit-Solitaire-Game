@@ -1,1 +1,1 @@
-# Trendyol-Bootcam-One-Suit-Solitaire-Game
+# Trendyol-Bootcamp-One-Suit-Solitaire-Game
