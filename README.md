@@ -1,0 +1,1 @@
+# Trendyol-Bootcam-One-Suit-Solitaire-Game
