@@ -1,9 +1,9 @@
 export default class Card {
 
-    constructor(id, value, next, image) {
+    constructor(id, value, nextValue, image) {
         this.id = id
         this.value = value;
-        this.next = next
+        this.nextValue = nextValue
         this.image = image
         this.showFront = false
     }
