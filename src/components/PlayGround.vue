@@ -1,5 +1,29 @@
 <template>
-  <div>Play Ground</div>
+  <v-container style="margin-top: 100px">
+    <v-row>
+      <v-col cols="1"></v-col>
+      <v-col
+        v-for="(playingCardSuit, suitIndex) in playingCards"
+        :key="suitIndex"
+      >
+        <v-row v-for="playingCard in playingCardSuit" :key="playingCard.id">
+          <playing-card
+            :card="playingCard"
+            animation="200"
+          />
+        </v-row>
+      </v-col>
+      <v-col cols="1"></v-col>
+    </v-row>
+    <div
+      class="floorCards cursor"
+      v-for="card in floorCards"
+      :key="card.id"
+      @click="dealFloorCards"
+    >
+      <playing-card :card="card"> </playing-card>
+    </div>
+  </v-container>
 </template>
 
 <script>
