@@ -1,10 +1,14 @@
 <template>
-  <div class="green-table"></div>
+  <div class="green-table">
+    <play-ground />
+  </div>
 </template>
 
 <script>
+import PlayGround from "../components/PlayGround.vue";
 export default {
   name: "GameFloor",
+  components: { PlayGround },
 };
 </script>
 
