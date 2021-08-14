@@ -16,6 +16,7 @@ export default {
   },
   created() {
     this.initializeGame();
+    this.shuffleCards();
   },
   methods: {
     initializeGame() {
@@ -38,6 +39,11 @@ export default {
         );
       });
       this.cards.push(...cards);
+    },
+    //It randomly shuffles the cards array
+    shuffleCards() {
+      const shuffledCards = _.shuffle(this.cards);
+      this.cards = shuffledCards;
     },
   },
 };
