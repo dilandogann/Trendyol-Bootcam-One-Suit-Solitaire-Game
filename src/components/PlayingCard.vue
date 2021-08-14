@@ -10,7 +10,7 @@
     <template v-else>
       <v-row>
         <v-col cols="cols">
-          <img class="card-image" src="card.backImage" />
+          <img class="card-image" src="./../assets/hearts-back.svg" />
         </v-col>
       </v-row>
     </template>
