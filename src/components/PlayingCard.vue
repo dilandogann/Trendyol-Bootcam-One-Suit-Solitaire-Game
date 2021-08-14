@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-container class="card-container">
     <template v-if="card.showFront">
       <v-row>
         <v-col cols="cols">
@@ -10,11 +10,11 @@
     <template v-else>
       <v-row>
         <v-col cols="cols">
-          <img class="card-image" src="./../assets/hearts-back.svg" />
+          <img class="card-image" src="./../assets/hearts-back.jpg" />
         </v-col>
       </v-row>
     </template>
-  </div>
+  </v-container>
 </template>
 
 <script>
@@ -32,5 +32,8 @@ export default {
 <style>
 .card-image {
   border-radius: 8px;
+}
+.card-container {
+  padding: 0;
 }
 </style>
