@@ -1,13 +1,20 @@
 <template>
   <v-container class="main-container">
-    <v-row>
+    <v-row class="main-row">
       <v-col cols="1"></v-col>
       <v-col
-        v-for="(playingCardSuit, suitIndex) in playingCards"
-        :key="suitIndex"
+        v-for="(playingCardChunk, chunkIndex) in playingCards"
+        :key="chunkIndex"
       >
-        <v-row v-for="playingCard in playingCardSuit" :key="playingCard.id">
-          <playing-card :card="playingCard" />
+        <v-row
+          v-for="(playingCard, cardIndex) in playingCardChunk"
+          :key="playingCard.id"
+        >
+          <playing-card
+            :card="playingCard"
+            class="playingCard"
+            @click.native="handleMove(chunkIndex, cardIndex)"
+          />
         </v-row>
       </v-col>
       <v-col cols="1"></v-col>
@@ -20,6 +27,9 @@
     >
       <playing-card :card="card"> </playing-card>
     </div>
+    <div data-app>
+      <custom-alert-component :error="error" />
+    </div>
   </v-container>
 </template>
 
@@ -28,16 +38,25 @@ import _ from "lodash";
 import CardArray from "../CardArray";
 import Card from "../Card";
 import PlayingCard from "../components/PlayingCard.vue";
+import CustomAlertComponent from "../components/CustomAlertComponent.vue";
 
 export default {
   name: "PlayGround",
-  components: { PlayingCard },
+  components: { PlayingCard, CustomAlertComponent },
   data() {
     return {
       id: 1,
+      movedIndex: null,
+      correctMove:true,
+      error: {
+        show: false,
+        message: "",
+      },
       cards: [],
       playingCards: [],
       floorCards: [],
+      selectedCards: [],
+
     };
   },
   created() {
@@ -46,6 +65,7 @@ export default {
     this.getRandomPlayGroundCards();
     this.getRemainingFloorCards();
     this.chunkPlayingCards();
+    this.showFrontSideOfLastCardsInChunks();
   },
   methods: {
     initializeGame() {
@@ -118,15 +138,94 @@ export default {
         this.playingCards[i][length - 1].showFront = true;
       }
     },
+    //When user clicks deal one card to each shuffle
+    dealFloorCards() {
+      this.selectedCards=[]
+      for (let i = 0; i < 10; i++) {
+        const card = this.floorCards.shift();
+        card.showFront = true;
+        this.playingCards[i].push(card);
+      }
+    },
+    handleMove(chunkIndex, cardIndex) {
+      if (this.selectedCards.length === 0) {
+        if (!this.playingCards[chunkIndex][cardIndex].showFront) {
+          this.error.message = "You can not move this item";
+          this.error.show = true;
+        } else {
+          this.movedIndex = chunkIndex;
+          const chunkLenght = this.playingCards[chunkIndex].length;
+          console.log("chunk lenght : ", chunkLenght);
+          if (cardIndex === chunkLenght - 1) {
+            this.selectedCards.push(this.playingCards[chunkIndex][cardIndex]);
+            console.log("Selected last item : ", this.selectedCards);
+          } else {
+            console.log("multiple")
+            for (let i = cardIndex; i < chunkLenght - 1; i++) {
+              console.log("i : ", i);
+              if (
+                this.playingCards[chunkIndex][i].nextValue !==
+                this.playingCards[chunkIndex][i + 1].value
+              ) {
+                console.log(
+                  this.playingCards[chunkIndex][i].nextValue,
+                  " !== ",
+                  this.playingCards[chunkIndex][i + 1].value
+                );
+                this.movedIndex = null;
+                this.selectedCards = [];
+                this.error.message = "You can not move this item";
+                this.error.show = true;
+                this.correctMove=false
+              } else {
+                this.movedIndex = chunkIndex;
+                this.selectedCards.push(this.playingCards[chunkIndex][i]);
+                console.log("Selected cards : ", this.selectedCards);
+              }
+            }
+            if(this.correctMove){
+              this.selectedCards.push(this.playingCards[chunkIndex][chunkLenght - 1]);
+              console.log("Selected cards : ", this.selectedCards);
+            }
+          }
+        }
+      } else {
+        if (!this.playingCards[chunkIndex][cardIndex].showFront) {
+          this.selectedCards=[]
+          this.error.message = "You can not move this item";
+          this.error.show = true;
+        } else if (
+          this.playingCards[chunkIndex][cardIndex].nextValue !==
+          this.selectedCards[0].value
+        ) {
+          this.selectedCards=[]
+          this.error.message = "You can not move this item";
+          this.error.show = true;
+        } else {
+          for (let i = 0; i < this.selectedCards.length; i++) {
+            this.playingCards[this.movedIndex].forEach((card, index) =>{
+              if (card.id === this.selectedCards[i].id) {
+                this.playingCards[this.movedIndex].splice(index, 1);
+                this.playingCards[chunkIndex].push(this.selectedCards[i]);
+              }
+            });
+          }
+          const movedIndexLength=this.playingCards[this.movedIndex].length
+          this.playingCards[this.movedIndex][movedIndexLength-1].showFront=true
+          this.selectedCards=[]
+          this.checkIfThereIsCompletedSuits();
+        }
+      }
+    },
   },
 };
 </script>
 <style>
-.main-container{
-  margin-top: 100px
+.main-container {
+  margin-top: 100px;
 }
-.cursor{
-    cursor: pointer;
+.cursor {
+  cursor: pointer;
 }
 .playingCard {
   margin-bottom: -4.5vw;
@@ -135,5 +234,10 @@ export default {
   position: absolute;
   right: 30px;
   bottom: 30px;
+}
+.main-row {
+  flex-wrap: inherit;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 </style>
