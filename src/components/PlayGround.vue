@@ -27,9 +27,11 @@
 import _ from "lodash";
 import CardArray from "../CardArray";
 import Card from "../Card";
+import PlayingCard from "../components/PlayingCard.vue";
 
 export default {
   name: "PlayGround",
+  components: { PlayingCard },
   data() {
     return {
       id: 1,
