@@ -17,7 +17,6 @@
           />
         </v-row>
       </v-col>
-      <v-col cols="1"></v-col>
     </v-row>
     <div
       class="floorCards cursor"
@@ -47,7 +46,7 @@ export default {
     return {
       id: 1,
       movedIndex: null,
-      correctMove:true,
+      correctMove: true,
       error: {
         show: false,
         message: "",
@@ -56,7 +55,6 @@ export default {
       playingCards: [],
       floorCards: [],
       selectedCards: [],
-
     };
   },
   created() {
@@ -140,7 +138,7 @@ export default {
     },
     //When user clicks deal one card to each shuffle
     dealFloorCards() {
-      this.selectedCards=[]
+      this.selectedCards = [];
       for (let i = 0; i < 10; i++) {
         const card = this.floorCards.shift();
         card.showFront = true;
@@ -160,7 +158,7 @@ export default {
             this.selectedCards.push(this.playingCards[chunkIndex][cardIndex]);
             console.log("Selected last item : ", this.selectedCards);
           } else {
-            console.log("multiple")
+            console.log("multiple");
             for (let i = cardIndex; i < chunkLenght - 1; i++) {
               console.log("i : ", i);
               if (
@@ -176,44 +174,75 @@ export default {
                 this.selectedCards = [];
                 this.error.message = "You can not move this item";
                 this.error.show = true;
-                this.correctMove=false
+                this.correctMove = false;
               } else {
                 this.movedIndex = chunkIndex;
                 this.selectedCards.push(this.playingCards[chunkIndex][i]);
                 console.log("Selected cards : ", this.selectedCards);
               }
             }
-            if(this.correctMove){
-              this.selectedCards.push(this.playingCards[chunkIndex][chunkLenght - 1]);
+            if (this.correctMove) {
+              this.selectedCards.push(
+                this.playingCards[chunkIndex][chunkLenght - 1]
+              );
               console.log("Selected cards : ", this.selectedCards);
             }
           }
         }
       } else {
         if (!this.playingCards[chunkIndex][cardIndex].showFront) {
-          this.selectedCards=[]
+          this.selectedCards = [];
           this.error.message = "You can not move this item";
           this.error.show = true;
         } else if (
           this.playingCards[chunkIndex][cardIndex].nextValue !==
           this.selectedCards[0].value
         ) {
-          this.selectedCards=[]
+          this.selectedCards = [];
           this.error.message = "You can not move this item";
           this.error.show = true;
         } else {
           for (let i = 0; i < this.selectedCards.length; i++) {
-            this.playingCards[this.movedIndex].forEach((card, index) =>{
+            this.playingCards[this.movedIndex].forEach((card, index) => {
               if (card.id === this.selectedCards[i].id) {
                 this.playingCards[this.movedIndex].splice(index, 1);
                 this.playingCards[chunkIndex].push(this.selectedCards[i]);
               }
             });
           }
-          const movedIndexLength=this.playingCards[this.movedIndex].length
-          this.playingCards[this.movedIndex][movedIndexLength-1].showFront=true
-          this.selectedCards=[]
+          const movedIndexLength = this.playingCards[this.movedIndex].length;
+          this.playingCards[this.movedIndex][
+            movedIndexLength - 1
+          ].showFront = true;
+          this.selectedCards = [];
           this.checkIfThereIsCompletedSuits();
+        }
+      }
+    },
+    checkIfThereIsCompletedSuits() {
+      let counter = 0;
+      for (let i = 0; i < this.playingCards.length; i++) {
+        for (let k = 0; k < this.playingCards[i].length; k++) {
+          if (this.playingCards[i][k].value === "A") {
+            let index = k;
+            do {
+              if (
+                this.playingCards[i][index].nextValue ===
+                this.playingCards[i][index + 1].value
+              ) {
+                counter++;
+              } else {
+                counter = 0;
+                break;
+              }
+            } while (++index < this.playingCards[i][k].length - 1);
+            if (counter === 13) {
+              this.playingCards.splice(k, 13);
+              break;
+            } else {
+              counter = 0;
+            }
+          }
         }
       }
     },
@@ -228,6 +257,7 @@ export default {
   cursor: pointer;
 }
 .playingCard {
+  margin-left: 8px !important;
   margin-bottom: -4.5vw;
 }
 .floorCards {
