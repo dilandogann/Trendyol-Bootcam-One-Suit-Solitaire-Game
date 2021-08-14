@@ -13,13 +13,16 @@ export default {
     return {
       id: 1,
       cards: [],
-      playingCards:[],
+      playingCards: [],
       floorCards: [],
     };
   },
   created() {
     this.initializeGame();
     this.shuffleCards();
+    this.getRandomPlayGroundCards();
+    this.getRemainingFloorCards();
+    this.chunkPlayingCards();
   },
   methods: {
     initializeGame() {
@@ -73,6 +76,18 @@ export default {
         if (filtered.length === 0) return card;
       });
     },
+  },
+  //Creating 6-6-6-6-5-5-5-5-5-5 chunks of playingCards array
+  chunkPlayingCards() {
+    const overflowingItems = this.playingCards.slice(-4);
+    this.playingCards = this.playingCards.slice(
+      0,
+      this.playingCards.length - 4
+    );
+    this.playingCards = _.chunk(this.playingCards, 5);
+    for (let i = 0; i < overflowingItems.length; i++) {
+      this.playingCards[i].push(overflowingItems[i]);
+    }
   },
 };
 </script>
