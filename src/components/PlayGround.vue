@@ -13,7 +13,8 @@ export default {
     return {
       id: 1,
       cards: [],
-      playingCards:[]
+      playingCards:[],
+      floorCards: [],
     };
   },
   created() {
@@ -62,6 +63,15 @@ export default {
         this.playingCards.push(this.cards[randomNum]);
         randomIndexes.push(randomNum);
       }
+    },
+    //Get remaining cards for floorCards
+    getRemainingFloorCards() {
+      this.floorCards = this.cards.filter((card) => {
+        let filtered = this.playingCards.filter(
+          (playCard) => playCard.id === card.id
+        );
+        if (filtered.length === 0) return card;
+      });
     },
   },
 };
