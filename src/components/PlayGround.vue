@@ -89,5 +89,12 @@ export default {
       this.playingCards[i].push(overflowingItems[i]);
     }
   },
+  //It changes last card's of chunks showFront property in order to showing front side
+  showFrontSideOfLastCardsInChunks() {
+    for (let i = 0; i < this.playingCards.length; i++) {
+      const length = this.playingCards[i].length;
+      this.playingCards[i][length - 1].showFront = true;
+    }
+  },
 };
 </script>
