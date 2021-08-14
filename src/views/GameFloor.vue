@@ -4,7 +4,7 @@
 
 <script>
 export default {
-  name: "MainFloor",
+  name: "GameFloor",
 };
 </script>
 
