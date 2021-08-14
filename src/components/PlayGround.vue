@@ -9,10 +9,11 @@ import Card from "../Card";
 
 export default {
   name: "PlayGround",
-    data() {
+  data() {
     return {
       id: 1,
       cards: [],
+      playingCards:[]
     };
   },
   created() {
@@ -23,13 +24,13 @@ export default {
     initializeGame() {
       this.initializeCards();
     },
-    //It creates 8 copy of each playing cards
+    // It creates 8 copy of each playing cards
     initializeCards() {
       for (let i = 0; i < 8; i++) {
         this.createPlayingCard();
       }
     },
-    //It creates 13 playing cards
+    // It creates 13 playing cards
     createPlayingCard() {
       const cards = CardArray.map((cardItem) => {
         return new Card(
@@ -41,10 +42,26 @@ export default {
       });
       this.cards.push(...cards);
     },
-    //It randomly shuffles the cards array
+    // It randomly shuffles the cards array
     shuffleCards() {
       const shuffledCards = _.shuffle(this.cards);
       this.cards = shuffledCards;
+    },
+    // It randomly picks 54 cards for playing cards
+    getRandomPlayGroundCards() {
+      // Lower and upper bounds
+      let lower = 0;
+      let upper = 103;
+
+      let randomIndexes = [];
+
+      // Calculating 54 random values in range 0 and 103
+      while (this.playingCards.length !== 54) {
+        let randomNum = _.random(lower, upper);
+        if (randomIndexes.includes(randomNum)) continue;
+        this.playingCards.push(this.cards[randomNum]);
+        randomIndexes.push(randomNum);
+      }
     },
   },
 };
