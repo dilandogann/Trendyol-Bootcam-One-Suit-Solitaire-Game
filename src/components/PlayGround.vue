@@ -3,6 +3,7 @@
 </template>
 
 <script>
+import _ from "lodash";
 import CardArray from "../CardArray";
 import Card from "../Card";
 
