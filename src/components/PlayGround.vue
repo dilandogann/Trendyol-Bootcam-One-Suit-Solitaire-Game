@@ -16,10 +16,9 @@
         :key="index"
         style="flex-grow: 0"
       >
-        <div class="placeholder" >
+        <div class="placeholder">
           <playing-card :card="{ showFront: false }" />
         </div>
-
       </v-col>
     </v-row>
     <v-row class="main-row">
@@ -27,24 +26,38 @@
         v-for="(playingCardChunk, chunkIndex) in playingCards"
         :key="chunkIndex"
       >
-        <template v-if="playingCardChunk.length === 0">
-          <div
-            class="placeholder"
-            @click="handleMove(chunkIndex, cardIndex)"
-          ></div>
-        </template>
-        <template v-else>
-          <v-row
-            v-for="(playingCard, cardIndex) in playingCardChunk"
-            :key="playingCard.id"
-          >
-            <playing-card
-              :card="playingCard"
-              class="playingCard"
-              @click.native="handleMove(chunkIndex, cardIndex)"
-            />
-          </v-row>
-        </template>
+        <draggable
+          class="list-group"
+          :list="playingCardChunk"
+          v-bind="dragOptions"
+          multi-drag
+         selected-class="multi-drag"
+          @start="onDragStart"
+          :move="onMoveCallback"
+          :sort="false"
+          group="card"
+          @change="checkChange"
+        >
+          <template v-if="playingCardChunk.length === 0">
+            <div
+              class="placeholder"
+              @click="handleMove(chunkIndex, cardIndex)"
+            ></div>
+          </template>
+
+          <template v-else>
+            <v-row
+              v-for="(playingCard, cardIndex) in playingCardChunk"
+              :key="playingCard.id"
+            >
+              <playing-card
+                :card="playingCard"
+                class="playingCard"
+                @click.native="handleMove(chunkIndex, cardIndex)"
+              />
+            </v-row>
+          </template>
+        </draggable>
       </v-col>
     </v-row>
     <div data-app>
@@ -54,6 +67,7 @@
 </template>
 
 <script>
+import draggable from "vuedraggable";
 import _ from "lodash";
 import CardArray from "../CardArray";
 import Card from "../Card";
@@ -62,7 +76,7 @@ import CustomAlertComponent from "../components/CustomAlertComponent.vue";
 
 export default {
   name: "PlayGround",
-  components: { PlayingCard, CustomAlertComponent },
+  components: { PlayingCard, CustomAlertComponent, draggable },
   data() {
     return {
       id: 1,
@@ -77,6 +91,13 @@ export default {
       selectedCards: [],
       collectedDeckCount: 0,
       collectedDecks: [],
+      dragOptions: {
+        animation: 150,
+        group: "description",
+        ghostClass: "ghost",
+        disabled: false,
+      },
+      isDragging: false,
     };
   },
   created() {
@@ -274,6 +295,22 @@ export default {
       this.error.message = message;
       this.error.show = show;
     },
+    onDragStart(e) {
+      return false;
+      this.isDragging = true;
+      this.isDragging = false;
+      // console.log("start");
+      // this.isDragging = true;
+      // e.item._selected_items = this.playingCards[this.movedIndex].filter((f) => this.selected[f.id]);
+      // console.log(e.item._selected_items);
+    },
+     onMoveCallback(evt, originalEvent){
+       console.log(evt)
+    return true
+   },
+    checkChange(){
+      console.log("aaa")
+    }
   },
 };
 </script>
