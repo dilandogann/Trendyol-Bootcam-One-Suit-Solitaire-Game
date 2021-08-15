@@ -6,7 +6,9 @@
         :key="chunkIndex"
       >
         <template v-if="playingCardChunk.length === 0">
-          <v-card> </v-card>
+          <div class="placeholder" @click="handleMove(chunkIndex, cardIndex)">
+
+          </div>
         </template>
         <template v-else>
           <v-row
@@ -157,23 +159,14 @@ export default {
         } else {
           this.movedIndex = chunkIndex;
           const chunkLenght = this.playingCards[chunkIndex].length;
-          console.log("chunk lenght : ", chunkLenght);
           if (cardIndex === chunkLenght - 1) {
             this.selectedCards.push(this.playingCards[chunkIndex][cardIndex]);
-            console.log("Selected last item : ", this.selectedCards);
           } else {
-            console.log("multiple");
             for (let i = cardIndex; i < chunkLenght - 1; i++) {
-              console.log("i : ", i);
               if (
                 this.playingCards[chunkIndex][i].nextValue !==
                 this.playingCards[chunkIndex][i + 1].value
               ) {
-                console.log(
-                  this.playingCards[chunkIndex][i].nextValue,
-                  " !== ",
-                  this.playingCards[chunkIndex][i + 1].value
-                );
                 this.movedIndex = null;
                 this.selectedCards = [];
                 this.error.message = "You can not move this item";
@@ -182,18 +175,27 @@ export default {
               } else {
                 this.movedIndex = chunkIndex;
                 this.selectedCards.push(this.playingCards[chunkIndex][i]);
-                console.log("Selected cards : ", this.selectedCards);
               }
             }
             if (this.correctMove) {
               this.selectedCards.push(
                 this.playingCards[chunkIndex][chunkLenght - 1]
               );
-              console.log("Selected cards : ", this.selectedCards);
             }
           }
         }
       } else {
+        //If the suit is empty
+        if (this.playingCards[chunkIndex].length === 0) {
+          for (let i = 0; i < this.selectedCards.length; i++) {
+            this.playingCards[this.movedIndex].forEach((card, index) => {
+              if (card.id === this.selectedCards[i].id) {
+                this.playingCards[this.movedIndex].splice(index, 1);
+                this.playingCards[chunkIndex].push(this.selectedCards[i]);
+              }
+            });
+          }
+        }
         if (!this.playingCards[chunkIndex][cardIndex].showFront) {
           this.selectedCards = [];
           this.error.message = "You can not move this item";
@@ -243,7 +245,7 @@ export default {
             }
             if (counter === 12 && index === this.playingCards[i].length - 1) {
               this.playingCards[i].splice(k, 13);
-              const length=this.playingCards[i].length
+              const length = this.playingCards[i].length;
               this.playingCards[i][length - 1].showFront = true;
             } else {
               counter = 0;
@@ -275,5 +277,12 @@ export default {
   flex-wrap: inherit;
   padding-left: 10px;
   padding-right: 10px;
+}
+.placeholder {
+  width: 99px;
+  height: 137px;
+  background: transparent;
+  border: 2px solid rgb(0 0 0 / 87%);
+  border-radius: 8px;
 }
 </style>
