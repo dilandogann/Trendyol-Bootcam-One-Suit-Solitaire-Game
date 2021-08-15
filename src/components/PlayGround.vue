@@ -1,14 +1,37 @@
 <template>
-  <v-container class="main-container">
+  <v-container>
+    <v-row>
+      <v-col cols="5">
+        <div
+          class="floorCards cursor"
+          v-for="card in floorCards"
+          :key="card.id"
+          @click="dealFloorCards"
+        >
+          <playing-card :card="card"> </playing-card>
+        </div>
+      </v-col>
+      <v-col
+        v-for="(isCollected, index) in collectedDecks"
+        :key="index"
+        style="flex-grow: 0"
+      >
+        <div class="placeholder" >
+          <playing-card :card="{ showFront: false }" />
+        </div>
+
+      </v-col>
+    </v-row>
     <v-row class="main-row">
       <v-col
         v-for="(playingCardChunk, chunkIndex) in playingCards"
         :key="chunkIndex"
       >
         <template v-if="playingCardChunk.length === 0">
-          <div class="placeholder" @click="handleMove(chunkIndex, cardIndex)">
-
-          </div>
+          <div
+            class="placeholder"
+            @click="handleMove(chunkIndex, cardIndex)"
+          ></div>
         </template>
         <template v-else>
           <v-row
@@ -24,14 +47,6 @@
         </template>
       </v-col>
     </v-row>
-    <div
-      class="floorCards cursor"
-      v-for="card in floorCards"
-      :key="card.id"
-      @click="dealFloorCards"
-    >
-      <playing-card :card="card"> </playing-card>
-    </div>
     <div data-app>
       <custom-alert-component :error="error" />
     </div>
@@ -52,7 +67,6 @@ export default {
     return {
       id: 1,
       movedIndex: null,
-      correctMove: true,
       error: {
         show: false,
         message: "",
@@ -61,9 +75,12 @@ export default {
       playingCards: [],
       floorCards: [],
       selectedCards: [],
+      collectedDeckCount: 0,
+      collectedDecks: [],
     };
   },
   created() {
+    this.collectedDecks = new Array(8).fill(false);
     this.initializeGame();
     this.shuffleCards();
     this.getRandomPlayGroundCards();
@@ -150,80 +167,74 @@ export default {
         card.showFront = true;
         this.playingCards[i].push(card);
       }
+      this.checkIfThereIsCompletedSuits();
     },
     handleMove(chunkIndex, cardIndex) {
       if (this.selectedCards.length === 0) {
+        //If card is close user cant move that card
         if (!this.playingCards[chunkIndex][cardIndex].showFront) {
-          this.error.message = "You can not move this item";
-          this.error.show = true;
+          this.handleAlertModal("You can not move this item", true);
         } else {
-          this.movedIndex = chunkIndex;
+          let correctMove = true;
           const chunkLenght = this.playingCards[chunkIndex].length;
-          if (cardIndex === chunkLenght - 1) {
-            this.selectedCards.push(this.playingCards[chunkIndex][cardIndex]);
-          } else {
-            for (let i = cardIndex; i < chunkLenght - 1; i++) {
-              if (
-                this.playingCards[chunkIndex][i].nextValue !==
+          //There are multiple cards to move
+          for (let i = cardIndex; i < chunkLenght; i++) {
+            if (
+              i === chunkLenght - 1 ||
+              this.playingCards[chunkIndex][i].nextValue ===
                 this.playingCards[chunkIndex][i + 1].value
-              ) {
-                this.movedIndex = null;
-                this.selectedCards = [];
-                this.error.message = "You can not move this item";
-                this.error.show = true;
-                this.correctMove = false;
-              } else {
-                this.movedIndex = chunkIndex;
-                this.selectedCards.push(this.playingCards[chunkIndex][i]);
-              }
+            ) {
+              this.selectedCards.push(this.playingCards[chunkIndex][i]);
+            } else {
+              this.selectedCards = [];
+              correctMove = false;
+              this.handleAlertModal("You can not move these items", true);
+              break;
             }
-            if (this.correctMove) {
-              this.selectedCards.push(
-                this.playingCards[chunkIndex][chunkLenght - 1]
-              );
-            }
+          }
+          if (correctMove) {
+            //Set the index which chunk cards will be moving from
+            this.movedIndex = chunkIndex;
           }
         }
       } else {
-        //If the suit is empty
+        //If the suit is empty or move items without no check
         if (this.playingCards[chunkIndex].length === 0) {
-          for (let i = 0; i < this.selectedCards.length; i++) {
-            this.playingCards[this.movedIndex].forEach((card, index) => {
-              if (card.id === this.selectedCards[i].id) {
-                this.playingCards[this.movedIndex].splice(index, 1);
-                this.playingCards[chunkIndex].push(this.selectedCards[i]);
-              }
-            });
-          }
-        }
-        if (!this.playingCards[chunkIndex][cardIndex].showFront) {
+          this.putItemsToSelectedChunk(chunkIndex);
+          //If the card which user clicked is close
+        } else if (!this.playingCards[chunkIndex][cardIndex].showFront) {
           this.selectedCards = [];
-          this.error.message = "You can not move this item";
-          this.error.show = true;
+          this.handleAlertModal("Selected card is not open", true);
+          // if the next value of the last element of the chunk trying to be moved is not equal to the value of the first element of the selected cards
         } else if (
-          this.playingCards[chunkIndex][cardIndex].nextValue !==
-          this.selectedCards[0].value
+          this.playingCards[chunkIndex][
+            this.playingCards[chunkIndex].length - 1
+          ].nextValue !== this.selectedCards[0].value
         ) {
           this.selectedCards = [];
-          this.error.message = "You can not move this item";
-          this.error.show = true;
+          this.handleAlertModal("Selected place is not avaliable", true);
+          //Move items
         } else {
-          for (let i = 0; i < this.selectedCards.length; i++) {
-            this.playingCards[this.movedIndex].forEach((card, index) => {
-              if (card.id === this.selectedCards[i].id) {
-                this.playingCards[this.movedIndex].splice(index, 1);
-                this.playingCards[chunkIndex].push(this.selectedCards[i]);
-              }
-            });
-          }
-          const movedIndexLength = this.playingCards[this.movedIndex].length;
-          this.playingCards[this.movedIndex][
-            movedIndexLength - 1
-          ].showFront = true;
-          this.selectedCards = [];
-          this.checkIfThereIsCompletedSuits();
+          this.putItemsToSelectedChunk(chunkIndex);
         }
       }
+    },
+    putItemsToSelectedChunk(chunkIndex) {
+      for (let i = 0; i < this.selectedCards.length; i++) {
+        this.playingCards[this.movedIndex].forEach((card, index) => {
+          if (card.id === this.selectedCards[i].id) {
+            this.playingCards[this.movedIndex].splice(index, 1);
+            this.playingCards[chunkIndex].push(this.selectedCards[i]);
+          }
+        });
+      }
+      const movedIndexLength = this.playingCards[this.movedIndex].length;
+      if (movedIndexLength)
+        this.playingCards[this.movedIndex][
+          movedIndexLength - 1
+        ].showFront = true;
+      this.selectedCards = [];
+      this.checkIfThereIsCompletedSuits();
     },
     checkIfThereIsCompletedSuits() {
       let counter = 0;
@@ -246,7 +257,12 @@ export default {
             if (counter === 12 && index === this.playingCards[i].length - 1) {
               this.playingCards[i].splice(k, 13);
               const length = this.playingCards[i].length;
-              this.playingCards[i][length - 1].showFront = true;
+              //If its not an empty suit
+              if (length > 0) {
+                this.playingCards[i][length - 1].showFront = true;
+              }
+              this.collectedDecks[this.collectedDeckCount] = true;
+              ++this.collectedDeckCount;
             } else {
               counter = 0;
             }
@@ -254,12 +270,16 @@ export default {
         }
       }
     },
+    handleAlertModal(message, show) {
+      this.error.message = message;
+      this.error.show = show;
+    },
   },
 };
 </script>
 <style>
-.main-container {
-  margin-top: 100px;
+.playing-cards-container {
+  margin-top: 50px;
 }
 .cursor {
   cursor: pointer;
@@ -270,17 +290,16 @@ export default {
 }
 .floorCards {
   position: absolute;
-  right: 30px;
-  bottom: 30px;
 }
 .main-row {
   flex-wrap: inherit;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin-top: 50px !important;
 }
 .placeholder {
-  width: 99px;
-  height: 137px;
+  width: 104px;
+  height: 143px;
   background: transparent;
   border: 2px solid rgb(0 0 0 / 87%);
   border-radius: 8px;
