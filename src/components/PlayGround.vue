@@ -226,18 +226,20 @@ export default {
           if (this.playingCards[i][k].value === "A") {
             let index = k;
             do {
-              if (
-                this.playingCards[i][index].nextValue ===
-                this.playingCards[i][index + 1].value
-              ) {
+              if(index === this.playingCards[i].length-1 ) {
+                break;
+              }
+              else if(this.playingCards[i][index].nextValue === this.playingCards[i][index + 1].value )
+               {
                 counter++;
+                index++;
               } else {
                 counter = 0;
                 break;
               }
-            } while (++index < this.playingCards[i][k].length - 1);
-            if (counter === 13) {
-              this.playingCards.splice(k, 13);
+            } while (counter < 13);
+            if (counter === 12 && index === this.playingCards[i].length-1 ) {
+              this.playingCards[i].splice(k, 13);
               break;
             } else {
               counter = 0;
