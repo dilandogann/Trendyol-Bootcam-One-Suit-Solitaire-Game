@@ -1,21 +1,25 @@
 <template>
   <v-container class="main-container">
     <v-row class="main-row">
-      <v-col cols="1"></v-col>
       <v-col
         v-for="(playingCardChunk, chunkIndex) in playingCards"
         :key="chunkIndex"
       >
-        <v-row
-          v-for="(playingCard, cardIndex) in playingCardChunk"
-          :key="playingCard.id"
-        >
-          <playing-card
-            :card="playingCard"
-            class="playingCard"
-            @click.native="handleMove(chunkIndex, cardIndex)"
-          />
-        </v-row>
+        <template v-if="playingCardChunk.length === 0">
+          <v-card> </v-card>
+        </template>
+        <template v-else>
+          <v-row
+            v-for="(playingCard, cardIndex) in playingCardChunk"
+            :key="playingCard.id"
+          >
+            <playing-card
+              :card="playingCard"
+              class="playingCard"
+              @click.native="handleMove(chunkIndex, cardIndex)"
+            />
+          </v-row>
+        </template>
       </v-col>
     </v-row>
     <div
@@ -225,9 +229,11 @@ export default {
         for (let k = 0; k < this.playingCards[i].length; k++) {
           if (this.playingCards[i][k].value === "A") {
             let index = k;
-            while(index !== this.playingCards[i].length-1){
-              if(this.playingCards[i][index].nextValue === this.playingCards[i][index + 1].value )
-               {
+            while (index !== this.playingCards[i].length - 1) {
+              if (
+                this.playingCards[i][index].nextValue ===
+                this.playingCards[i][index + 1].value
+              ) {
                 counter++;
                 index++;
               } else {
@@ -235,8 +241,10 @@ export default {
                 break;
               }
             }
-            if (counter === 12 && index === this.playingCards[i].length-1 ) {
+            if (counter === 12 && index === this.playingCards[i].length - 1) {
               this.playingCards[i].splice(k, 13);
+              const length=this.playingCards[i].length
+              this.playingCards[i][length - 1].showFront = true;
             } else {
               counter = 0;
             }
@@ -256,7 +264,7 @@ export default {
 }
 .playingCard {
   margin-left: 8px !important;
-  margin-bottom: -4.5vw;
+  margin-bottom: -6.5vw;
 }
 .floorCards {
   position: absolute;
